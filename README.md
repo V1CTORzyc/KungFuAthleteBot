@@ -3,6 +3,8 @@
 <img src="./docs/cover_ub.png" controls></img>
 
 
+[![Project Page](https://img.shields.io/badge/Project-Homepage-green?style=for-the-badge&logo=googlechrome)](https://kungfuathletebot.github.io/)
+&nbsp;
 [![arXiv](https://img.shields.io/badge/arXiv-Preprint-red?style=for-the-badge&logo=arxiv)](https://arxiv.org/abs/2602.13656)
 &nbsp;
 [![YouTube](https://img.shields.io/badge/YouTube-Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/8v2pAaRQcPw)
