@@ -32,17 +32,9 @@ Due to substantial noise in the source videos, the dataset has undergone multipl
 
 ## 🤩 What’s New: Native BeyondMimic Training
 
-We have recently implemented a tool (src/beyondmimic/qpos_to_npz.py) to convert QPOS format motion data into a format compatible with the **[whole_body_tracking](https://github.com/HybridRobotics/whole_body_tracking) (BeyondMimic)** project. After properly setting up the required environment for `whole_body_tracking`, this script can transform original QPOS files into `.npz` files suitable for training, ensuring that the data can be correctly loaded and utilized by BeyondMimic.
+This project is built upon the open-source **[unitree_rl_mjlab](https://github.com/unitreerobotics/unitree_rl_mjlab)** framework from Unitree Robotics. We have extended it with implementations of fall recovery and LKE sampling modules, and hereby publicly release the code repository related to 1307 motion training.
 
-### Usage
-
-```bash
-python scripts/qpos_to_npz.py \
-    --input_file org_smooth/kongfu_jump_smoothed/278/278.npz \
-    --input_fps 50 \
-    --output_path org_smooth_by/278.npz \
-    --output_fps 50
-```
+See the [Training with Unitree RL Mjlab](#code) section for detailed usage.
 
 ## Category Distribution
 
@@ -173,7 +165,7 @@ If you intend to perform motion retargeting to other robotic platforms, or to em
 ```
 
 
-### For Holosoma or BeyondMimic (`org_smoothed_mj/`)
+### For BeyondMimic (`org_smoothed_mj/`)
 
 All motion files under `org_smoothed_mj/` are stored in NumPy `.npz` format and contain time-sequential kinematic data for Unitree G1 training. Each file represents a single motion clip sampled at `fps` Hz and includes joint-level states and rigid-body states expressed in the **world coordinate frame** (quaternion format: xyzw; units: meters, radians, m/s, rad/s).
 
@@ -201,67 +193,13 @@ The KungfuAthlete dataset is constructed from publicly available high-dynamic vi
 
 The following content includes visualizations of GVHMR and GMR data, as well as examples of how we use height adjustment algorithms to process the qpos data. If you wish to apply this dataset to other robots, you can refer to our processing pipeline.
 
-
-
-## Training with Holosoma (BeyondMimic-style)
-
-We leverage the open-source framework [Holosoma](https://github.com/amazon-far/holosoma) released by Amazon FAR (Frontier AI & Robotics) to perform whole-body tracking and motion imitation training. Holosoma provides a unified full-stack infrastructure for humanoid simulation, reinforcement learning, and deployment, supporting scalable training pipelines across multiple simulation backends.
-
-Please note that, in order to introduce a non-contact force penalty on the head during training, we modified the original **holosoma** configuration. Specifically, we added `"head_link"` to the `g1_29dof.body_names` list in `src/holosoma/holosoma/config_values/robot.py`, and replaced the original `src/holosoma/holosoma/data/robots/g1/g1_29dof.xml` file with our customized version located at `src/holosoma/g1_29dof_with_head_link.xml`. These modifications enable explicit modeling of the head link and allow the corresponding non-contact force penalty to be applied during optimization.
-
-If you prefer not to introduce the additional head node, you may alternatively retarget the `qpos` from the `org_smoothed` data to generate the corresponding `_mj` files. In this case, please first refer to the required configuration adjustments under `src/holosoma_retargeting/config_types`, and then run the following command to convert the data format:
-
-```bash
-python data_conversion/convert_data_format_mj.py --input_file org_smoothed/ground_smoothed/1307/1307.npz --input_fps 50 --output_fps 50 --output_name converted_res/object_interaction/1307.npz --data_format gmr --once
-```
-
-Policies can be directly trained on motion files under `org_smoothed_mj/` in a BeyondMimic-style imitation learning setup. For example:
-
-```bash
-python src/holosoma/holosoma/train_agent.py \
-    exp:g1-29dof-wbt-stand-fast-sac \
-    --command.setup_terms.motion_command.params.motion_config.use_adaptive_timesteps_sampler=True \
-    --command.setup_terms.motion_command.params.motion_config.motion_file=org_smoothed_mj/1317/1317.npz
-```
-
-This command launches training for the G1 29-DoF whole-body tracking configuration using FastSAC, with adaptive timestep sampling enabled and the specified motion file used for imitation-driven policy optimization. Please note that for highly dynamic motions involving KungfuAthlete (jump), the training performance may be less stable or suboptimal under the current configuration.
-
-
-## Sim-to-Sim Transfer and Deployment
-
-We release three fall-resilient control policies that can be directly deployed via the Holosoma framework to both MuJoCo simulation and real-world hardware platforms. All model checkpoints are located under `src/holosoma/holosoma_inference/`.
-
-### Released Models
-
-* **969** — Single-leg stance (left leg support, right leg elevated)
-* **1307** — Tai Chi sequence (~5 minutes continuous motion)
-* **0203** — High-speed punching motions
-
-### ⚠️ Safety Notice
-
-> ⚠️ **Deployment to physical hardware involves inherent risks.**
-> Although these policies demonstrate fall-resilient behavior in simulation, real-world execution may lead to unexpected dynamics, instability, or hardware stress.
-> Users are strongly advised to conduct careful validation in simulation before deploying to real robots. We assume no responsibility for any potential hardware damage resulting from improper use or deployment.
-
-### Inference
-
-Inference can be performed via the `holosoma_inference` module:
-
-```bash
-python3 src/holosoma_inference/holosoma_inference/run_policy.py inference:g1-29dof-wbt \
-    --task.model-path 1307_model_1027000.onnx \
-    --task.no-use-joystick \
-    --task.rl-rate 50 \
-    --task.use-sim-time \
-    --task.interface lo
-```
-
-
 ## Project Structure
 
 ```
-src/
-├── demo/                         # Data demo files 
+docs/                                      # Document files
+unitree_rl_mjlab/                          # Unitree RL Mjlab Training Code
+retarget/                                  # Data Adjustment code
+├── demo/                                  # Data demo files 
 │   ├── gvhmr/                             # Pose data (gvhmr-pred .pt)
 │   │   ├── ground/                        # One foot always on the ground data
 │   │   └── jump/                          # Data containing jumping actions
@@ -275,16 +213,85 @@ src/
 │   ├── vis_robot_qpos.py                  # Newly added GMR script
 │   └── gvhmr_to_qpos.py                   # Newly added GMR script
 │
-├── ./docs/                                  # Document files
-│
 └── third_party/                           # External dependencies (submodules)
     └── GMR/                               # Motion retargeting
 ```
 
-## Installation
+## Training with Unitree RL Mjlab (BeyondMimic-style) <a id="code"></a>
 
-We have included a video (.mp4) for each action dataset in the download link. If you wish to utilize the root node adjustment feature or visualize the data yourself, please install the third-party packages listed below the repository:
+### 1. Installation
 
+Use the following command to create a virtual environment:
+
+```bash
+conda create -n unitree_rl_mjlab python=3.11
+conda activate unitree_rl_mjlab
+sudo apt install -y libyaml-cpp-dev libboost-all-dev libeigen3-dev libspdlog-dev libfmt-dev
+cd unitree_rl_mjlab
+pip install -e .
+```
+
+If you encounter any issues during installation, please refer to [the installation documentation for Unitree RL Mjlab](https://github.com/unitreerobotics/unitree_rl_mjlab/blob/main/doc/setup_en.md).
+
+### 2. Prepare Motion Files
+
+We provide a **ready-to-use** 1307 motion file for direct training.
+
+To use other motions, run the commands below to convert qpos files in the `org_smoothed/` directory to NPZ training files.
+
+```bash
+python scripts/qpos_to_npz.py \
+--input-file org_smooth/ground_smoothed/1307/1307.npz \
+--output-name 1307.npz \
+```
+
+### 3. Training
+
+After confirming the NPZ file are prepared, you can launch training. For detailed training parameters, please refer to [Unitree RL Mjlab](https://github.com/unitreerobotics/unitree_rl_mjlab/blob/main/README.md#22-training).
+
+Our training is divided into **three stages**:
+- Stage 1: Enable the policy to roughly track motions and acquire basic fall recovery capabilities.
+  ```bash
+  python scripts/train.py Unitree-G1-1307-Stage-I --motion_file=src/assets/motions/g1/1307.npz --env.scene.num-envs=8192 --env.commands.motion.sampling-mode=adaptive
+  ```
+- Stage 2: Improve the precision of motion tracking for the policy.
+  ```bash
+  python scripts/train.py Unitree-G1-1307-Stage-II --motion_file=src/assets/motions/g1/1307.npz --env.scene.num-envs=8192 --env.commands.motion.sampling-mode=adaptive --agent.resume=True
+  ```
+- Stage 3: Enhance the robustness of the policy to reduce the likelihood of falling.
+  ```bash
+  python scripts/train.py Unitree-G1-1307-Stage-III --motion_file=src/assets/motions/g1/1307.npz --env.scene.num-envs=8192 --env.commands.motion.sampling-mode=adaptive --agent.resume=True
+  ```
+
+### Released Models
+
+Model Path: `unitree_rl_mjlab\models\`
+
+* **1307** — Tai Chi sequence (~5 minutes continuous motion)
+
+#### ⚠️ Safety Notice
+
+> ⚠️ **Deployment to physical hardware involves inherent risks.**
+> Although these policies demonstrate fall-resilient behavior in simulation, real-world execution may lead to unexpected dynamics, instability, or hardware stress.
+> Users are strongly advised to conduct careful validation in simulation before deploying to real robots. We assume no responsibility for any potential hardware damage resulting from improper use or deployment.
+
+### Inference
+
+To visualize policy behavior in MuJoCo:
+
+```bash
+python scripts/play.py Unitree-G1-1307-Stage-I --motion_file=src/assets/motions/g1/1307.npz --checkpoint_file=models/1307/1307.pt
+```
+
+### Real and Simulation Deployment
+
+You can use the motion file 1307.npz, together with the policy files policy.onnx and policy.onnx.data, for both real and simulation deployment.
+
+For detailed deployment instructions and code, please refer to [Unitree RL Mjlab](https://github.com/unitreerobotics/unitree_rl_mjlab/blob/main/README.md#4-real-deployment).
+
+## For Data Adjustment
+
+We have included a video (.mp4) for each action dataset in the download link. If you wish to utilize the root node adjustment feature or visualize the data yourself, please navigate to the `retarget/` directory and install the third-party packages listed below the repository:
 
 ### 1. GMR Environment (Robot Retargeting)
 
@@ -309,9 +316,9 @@ pip install -r requirements.txt
 To use GMR-retargeted data for training, we have added scripts to GMR that adapt the data to training program required qpos format.
 
 ```bash
-cp retarget/scripts/gvhmr_to_qpos.py ./third_party/GMR/scripts/
-cp retarget/scripts/vis_robot_qpos.py ./third_party/GMR/scripts/
-cp retarget/scripts/adjust_robot_height_by_gravity.py ./third_party/GMR/scripts/
+cp ./scripts/gvhmr_to_qpos.py ./third_party/GMR/scripts/
+cp ./scripts/vis_robot_qpos.py ./third_party/GMR/scripts/
+cp ./scripts/adjust_robot_height_by_gravity.py ./third_party/GMR/scripts/
 ```
 ## Usage
 
@@ -482,9 +489,9 @@ This project builds upon the following excellent open-source projects:
 
 * [GVHMR](https://github.com/zju3dv/GVHMR): 3D human mesh recovery from video
 * [GMR](https://github.com/YanjieZe/GMR): general motion retargeting framework
-* [Holosoma](https://github.com/amazon-far/holosoma): full-stack humanoid simulation and reinforcement learning framework
+* [Unitree RL Mjlab](https://github.com/unitreerobotics/unitree_rl_mjlab): A lightweight, modular framework for RL robotics research and sim-to-real deployment.
 
-We gratefully acknowledge these projects, upon which this dataset and training pipeline are built. GVHMR recovers 3D human motion directly in a gravity-aligned reference frame, enabling physically consistent motion reconstruction from raw training videos. GMR is used for motion reorientation and normalization. Holosoma is a comprehensive humanoid robotics framework for training and deploying reinforcement learning policies on humanoid robots, as well as motion retargeting. Without these open-source projects, large-scale processing of in-the-wild martial arts videos and the open release of this dataset would not have been feasible.  
+We gratefully acknowledge these projects, upon which this dataset and training pipeline are built. GVHMR recovers 3D human motion directly in a gravity-aligned reference frame, enabling physically consistent motion reconstruction from raw training videos. GMR is used for motion reorientation and normalization. Unitree RL Mjlab is a comprehensive humanoid robotics framework for training and deploying reinforcement learning policies on humanoid robots. Without these open-source projects, large-scale processing of in-the-wild martial arts videos and the open release of this dataset would not have been feasible.  
 
 
 ## License
@@ -492,7 +499,7 @@ We gratefully acknowledge these projects, upon which this dataset and training p
 This project depends on third-party library with its own licenses:
 
 
-Please review this licenses before use.
+Please review these licenses before use.
 
 ## Citation
 
