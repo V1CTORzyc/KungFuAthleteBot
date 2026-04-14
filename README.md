@@ -41,7 +41,7 @@ See the [Training with Unitree RL Mjlab](#code) section for detailed usage.
 Todo checklist:
 
 - [x] Dataset
-- [x] Retarget Code
+- [x] Height-Adjusted Code
 - [x] Training Code
 - [x] 1307(Tai Chi) Fall Recovery Checkpoint
 - [x] Real Deployment
