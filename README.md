@@ -30,29 +30,58 @@ Due to substantial noise in the source videos, the dataset has undergone multipl
 > The **Jump** subset still has minor imperfections due to video source limitations. Most samples have been carefully screened, though training performance may vary.
 > Your feedback and suggestions are greatly appreciated.
 
-## 🤩 What’s New: Native BeyondMimic Training
+## 🤩 What’s New: Mjlab-Based Fall Recovery Code (Open Source)
 
 This project is built upon the open-source **[unitree_rl_mjlab](https://github.com/unitreerobotics/unitree_rl_mjlab)** framework from Unitree Robotics. We have extended it with implementations of fall recovery and LKE sampling modules, and hereby publicly release the code repository related to 1307 motion training.
 
 See the [Training with Unitree RL Mjlab](#code) section for detailed usage.
 
-## Category Distribution
+## Open-Source Status
 
-| Category       | Count  | Example Subcategories                                |
-| -------------- | ------ | ---------------------------------------------------- |
-| Daily Training | 715    | –                                                    |
-| Fist           | 53     | Long Fist (33), Tai Chi Fist (14), Southern Fist (6) |
-| Staff          | 30     | Staff Technique (30)                                 |
-| Skills         | 28     | Backflip (12), Lotus Swing (9)                       |
-| Saber / Sword  | 15 / 7 | Southern Saber (15), Tai Chi Sword (7)               |
+Todo checklist:
+
+- [√] Dataset
+- [√] Retarget Code
+- [√] Training Code
+- [√] 1307(Tai Chi) Fall Recovery Checkpoint
+- [√] Real Deployment
+- [ ] More Data
+
+## Dataset Category Distribution
+
+| Category       | Count  | Example Subcategories                                       |
+| -------------- | ------ | ----------------------------------------------------------- |
+| Daily Training | 624    | Training(624)                                               |
+| Saber / Sword  | 111    | Saber(50), Sword(37), Southern Saber(15), Tai Chi Sword(9)  |
+| Fist           | 98     | Long Fist(69), Tai Chi Fist(21), Southern Fist(8)           |
+| Staff          | 90     | Staff Technique(90)                                         |
+| Skills         | 69     | Side Flip(35), Air Spin(18), Lotus Swing(13), Backflip(3)   |
+
+
+| Category | Total | Subcategory          | Count |
+| -------- | ----- | --------------------| ----- |
+| Ground   | 822   | Daily Training       | 550   |
+|          |       | Fist                | 93    |
+|          |       | Saber / Sword        | 99    |
+|          |       | Staff               | 80    |
+| Jump     | 170   | Daily Training       | 74    |
+|          |       | Fist                | 5     |
+|          |       | Saber / Sword        | 12    |
+|          |       | Skills              | 69    |
+|          |       | - Side Flip          | 35    |
+|          |       | - Air Spin           | 18    |
+|          |       | - Lotus Swing        | 13    |
+|          |       | - Backflip           | 3     |
+|          |       | - Other Skills       | 0     |
+|          |       | Staff               | 10    |
 
 ### Notes
 
-* **Daily Training** dominates the dataset (**715 samples, ~84%**), mainly representing standard practice routines rather than explicit technique demonstrations.
-* **Boxing techniques** form the largest specialized category, with **Changquan (Long Fist)** being the most prevalent.
-* **Skill-based movements** concentrate on high-difficulty acrobatics such as somersaults and lotus swings.
-* Weapon-based motions are limited and do not include weapon parts or hand movements (subject to future updates).
-
+* The dataset consists of **992 motion samples** in total, divided into **Ground (822)** and **Jump (170)** categories.
+* **Daily Training** accounts for the largest proportion, with **624 samples** across both ground and jump motions, mainly reflecting basic routine movements.
+* Ground motions include **Fist (93), Saber / Sword (99)**, and **Staff (80)**; jump motions include a small number of **Fist (5), Saber / Sword (12)**, and **Staff (10)** techniques.
+* **Skill-based movements** only exist in jump motions, totaling **69 samples**, focusing on high-difficulty acrobatics such as **Side Flip (35), Air Spin (18), Lotus Swing (13)**, and **Backflip (3)**.
+* Weapon-related motions only contain overall movement sequences and do not include detailed weapon or hand operations (to be updated in future versions).
 ---
 
 ## Motion Statistics Comparison
@@ -185,7 +214,7 @@ motion_clip = {
 
 Here, `T` denotes the number of frames in the motion clip.
 
-## Download
+## Download Dataset
 
 You can obtain the KungfuAthlete dataset through **[this link](https://drive.google.com/drive/folders/1ZntW9jPA-BXxttvCWlKQsSbmXt91fSsh?usp=sharing)** and use it directly for your robot training. We provide GVHMR pred data and pre-cleaned **g1** robot qpos data. 
 
@@ -283,7 +312,24 @@ To visualize policy behavior in MuJoCo:
 python scripts/play.py Unitree-G1-1307-Stage-I --motion_file=src/assets/motions/g1/1307.npz --checkpoint_file=models/1307/1307.pt
 ```
 
-### Real and Simulation Deployment
+<table>
+<tr>
+<td align="center" width="50%">
+
+![](./docs/1307_simulation_mujoco.gif)  
+**1307 Motion Inference Example**
+
+</td>
+<td align="center" width="50%">
+
+![](./docs/1307_real_deployment.gif)  
+**1307 Motion Real Deployment**
+
+</td>
+</tr>
+</table>
+
+### Real and Simulation Deployment (Same to Unitree RL Mjlab)
 
 You can use the motion file 1307.npz, together with the policy files policy.onnx and policy.onnx.data, for both real and simulation deployment.
 
@@ -433,9 +479,6 @@ When predicting jump-type actions or data with excessive leg movement variations
 </td>
 </tr>
 </table>
-
-
-
 
 ## Video Source and Acknowledgement
 
