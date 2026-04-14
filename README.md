@@ -40,11 +40,11 @@ See the [Training with Unitree RL Mjlab](#code) section for detailed usage.
 
 Todo checklist:
 
-- [√] Dataset
-- [√] Retarget Code
-- [√] Training Code
-- [√] 1307(Tai Chi) Fall Recovery Checkpoint
-- [√] Real Deployment
+- [x] Dataset
+- [x] Retarget Code
+- [x] Training Code
+- [x] 1307(Tai Chi) Fall Recovery Checkpoint
+- [x] Real Deployment
 - [ ] More Data
 
 ## Dataset Category Distribution
