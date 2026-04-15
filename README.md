@@ -309,7 +309,7 @@ Model Path: `unitree_rl_mjlab\models\`
 To visualize policy behavior in MuJoCo:
 
 ```bash
-python scripts/play.py Unitree-G1-1307-Stage-I --motion_file=src/assets/motions/g1/1307.npz --checkpoint_file=models/1307/1307.pt
+python scripts/play.py Unitree-G1-1307-Checkpoint --motion_file=src/assets/motions/g1/1307.npz --checkpoint_file=models/1307/1307.pt
 ```
 
 <table>
