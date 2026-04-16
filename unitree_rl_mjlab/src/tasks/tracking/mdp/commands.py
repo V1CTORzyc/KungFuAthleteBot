@@ -604,9 +604,10 @@ class MotionStandingCommand(MotionCommand):
       ranges[:, 0], ranges[:, 1], (len(env_ids), 6), device=self.device
     )
     root_pos[env_ids] += rand_samples[:, 0:3]
-    sampled_init_ids = torch.tensor(self.most_diverse_idxs)[torch.randint(low=0, high=len(self.most_diverse_idxs), size=(env_ids.numel(),)).long()]
-    sampled_init_root_states_xyzw = self.init_robot_data["robot_root_states_xyzw"][sampled_init_ids].to(self.device)
-    sampled_init_dof_pos = self.init_robot_data["dof_pos"][sampled_init_ids].to(self.device)
+    sampled_init_root_ids = torch.tensor(self.most_diverse_idxs)[torch.randint(low=0, high=len(self.most_diverse_idxs), size=(env_ids.numel(),)).long()]
+    sampled_init_root_states_xyzw = self.init_robot_data["robot_root_states_xyzw"][sampled_init_root_ids].to(self.device)
+    sampled_init_dof_ids = torch.randint(low=0, high=self.init_robot_data["num_envs"], size=(env_ids.numel(),)).long()
+    sampled_init_dof_pos = self.init_robot_data["dof_pos"][sampled_init_dof_ids].to(self.device)
     sampled_init_dof_vel = torch.zeros_like(sampled_init_dof_pos)
     
     root_pos[env_ids] = torch.where(
