@@ -149,6 +149,11 @@ def make_tracking_standing_env_cfg() -> ManagerBasedRlEnvCfg:
 
   commands: dict[str, CommandTermCfg] = {
     "motion": MotionStandingCommandCfg(
+      init_pos_file="",
+      root_body_name=(),
+      shoulders_body_names=(),
+      feet_body_names=(),
+      tracking_standing_weight=(1.0, 1.0),
       entity_name="robot",
       resampling_time_range=(1.0e9, 1.0e9),
       debug_vis=True,
@@ -166,11 +171,6 @@ def make_tracking_standing_env_cfg() -> ManagerBasedRlEnvCfg:
       motion_file="",
       anchor_body_name="",
       body_names=(),
-      init_pos_file="",
-      root_body_name=(),
-      shoulders_body_names=(),
-      feet_body_names=(),
-      tracking_standing_weight=(1.0, 1.0),
     )
   }
 
@@ -340,7 +340,7 @@ def make_tracking_standing_env_cfg() -> ManagerBasedRlEnvCfg:
       azimuth=120.0,
     ),
     sim=SimulationCfg(
-      nconmax=40,
+      nconmax=35,
       njmax=350,
       mujoco=MujocoCfg(
         timestep=0.005,
